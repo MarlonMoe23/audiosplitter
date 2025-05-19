@@ -33,6 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
+// Obtener nombre base del archivo sin extensión
+function getFileBaseName(fileName) {
+  return fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+}
+
   // Manejar el proceso de división
   splitButton.addEventListener('click', async () => {
     if (!selectedFile) return;
@@ -69,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = URL.createObjectURL(blob);
         
         outputFiles.push({
-          name: `parte_${i+1}.wav`,
+          name: `${getFileBaseName(selectedFile.name)}_parte_${i + 1}.wav`,
           url: url
         });
       }
