@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Divisor de Audio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Divisor de Archivos de Audio</h1>
+    
+    <div class="upload-container">
+      <label for="audio-file" class="file-label">
+        <span id="file-name">Seleccionar archivo de audio</span>
+        <input type="file" id="audio-file" accept=".mp3,.m4a,.wav,.ogg">
+      </label>
+      
+      <div class="parts-container">
+        <label for="parts">Dividir en:</label>
+        <input type="number" id="parts" min="2" value="2">
+        <span>partes iguales</span>
+      </div>
+      
+      <button id="split-button" disabled>Dividir Audio</button>
+    </div>
+    
+    <div id="progress-container" class="hidden">
+      <div class="progress-bar">
+        <div id="progress"></div>
+      </div>
+      <p id="status">Procesando...</p>
+    </div>
+    
+    <div id="results" class="hidden">
+      <h2>Archivos Divididos</h2>
+      <div id="download-links"></div>
+    </div>
+    
+    <footer>
+      <p>Procesamiento realizado en el navegador - No se suben archivos a ningún servidor</p>
+    </footer>
+  </div>
+  
+  <script src="browser-splitter.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
