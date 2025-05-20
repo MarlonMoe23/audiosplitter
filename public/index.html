@@ -470,174 +470,190 @@
 
   <script src="browser-splitter.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const audioFileInput = document.getElementById('audio-file');
-      const fileNameDisplay = document.getElementById('file-name');
-      const partsInput = document.getElementById('parts');
-      const decreasePartsBtn = document.getElementById('decrease-parts');
-      const increasePartsBtn = document.getElementById('increase-parts');
-      const splitButton = document.getElementById('split-button');
-      const progressContainer = document.getElementById('progress-container');
-      const progressBar = document.getElementById('progress');
-      const statusText = document.getElementById('status');
-      const resultsContainer = document.getElementById('results');
-      const downloadLinks = document.getElementById('download-links');
+  document.addEventListener('DOMContentLoaded', () => {
+    const audioFileInput = document.getElementById('audio-file');
+    const fileNameDisplay = document.getElementById('file-name');
+    const partsInput = document.getElementById('parts');
+    const decreasePartsBtn = document.getElementById('decrease-parts');
+    const increasePartsBtn = document.getElementById('increase-parts');
+    const splitButton = document.getElementById('split-button');
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress');
+    const statusText = document.getElementById('status');
+    const resultsContainer = document.getElementById('results');
+    const downloadLinks = document.getElementById('download-links');
 
-      let selectedFile = null;
-      const audioSplitter = new AudioSplitter();
+    let selectedFile = null;
+    const audioSplitter = new AudioSplitter();
 
-      // Actualizar nombre del archivo seleccionado
-      audioFileInput.addEventListener('change', (e) => {
-        selectedFile = e.target.files[0];
+    // Formatear duración en segundos a formato MM:SS
+    function formatDuration(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
 
-        if (selectedFile) {
-          fileNameDisplay.textContent = selectedFile.name;
-          fileNameDisplay.classList.add('visible');
-          splitButton.disabled = false;
-        } else {
-          fileNameDisplay.textContent = 'Ningún archivo seleccionado';
-          fileNameDisplay.classList.remove('visible');
-          splitButton.disabled = true;
-        }
-      });
+    // Formatear tamaño de archivo
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' bytes';
+      else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      else return (bytes / 1048576).toFixed(1) + ' MB';
+    }
 
-      // Controles para el número de partes
-      decreasePartsBtn.addEventListener('click', () => {
-        const currentValue = parseInt(partsInput.value);
-        if (currentValue > 2) {
-          partsInput.value = currentValue - 1;
-        }
-      });
+    // Actualizar nombre del archivo seleccionado
+    audioFileInput.addEventListener('change', (e) => {
+      selectedFile = e.target.files[0];
 
-      increasePartsBtn.addEventListener('click', () => {
-        const currentValue = parseInt(partsInput.value);
-        partsInput.value = currentValue + 1;
-      });
+      if (selectedFile) {
+        // Mostrar nombre y tamaño de inmediato
+        let info = selectedFile.name + ' | Tamaño: ' + formatFileSize(selectedFile.size);
 
-      // Validar número de partes
-      partsInput.addEventListener('input', () => {
-        const value = parseInt(partsInput.value);
-        if (value < 2) {
-          partsInput.value = 2;
-        }
-      });
+        // Obtener duración usando un elemento <audio>
+        const audio = document.createElement('audio');
+        audio.preload = 'metadata';
+        audio.src = URL.createObjectURL(selectedFile);
 
-      // Obtener nombre base del archivo sin extensión
-      function getFileBaseName(fileName) {
-        return fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
-      }
+        audio.onloadedmetadata = function() {
+          URL.revokeObjectURL(audio.src);
+          const duration = audio.duration;
+          info += ' | Duración: ' + formatDuration(duration);
+          fileNameDisplay.textContent = info;
+        };
 
-      // Formatear duración en segundos a formato MM:SS
-      function formatDuration(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-      }
-
-      // Formatear tamaño de archivo
-      function formatFileSize(bytes) {
-        if (bytes < 1024) return bytes + ' bytes';
-        else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-        else return (bytes / 1048576).toFixed(1) + ' MB';
-      }
-
-      // Manejar el proceso de división
-      splitButton.addEventListener('click', async () => {
-        if (!selectedFile) return;
-
-        const parts = parseInt(partsInput.value);
-        if (parts < 2) {
-          alert('Debes dividir el archivo en al menos 2 partes');
-          return;
-        }
-
-        // Mostrar progreso
-        progressContainer.classList.remove('hidden');
-        resultsContainer.classList.add('hidden');
-        progressBar.style.width = '0%';
-        statusText.textContent = 'Cargando archivo...';
-
-        try {
-          // Cargar el audio
-          progressBar.style.width = '20%';
-          const audioBuffer = await audioSplitter.loadAudio(selectedFile);
-          
-          // Dividir el audio
-          progressBar.style.width = '50%';
-          statusText.textContent = 'Dividiendo audio...';
-          const splitBuffers = audioSplitter.splitAudio(audioBuffer, parts);
-          
-          // Convertir a WAV
-          progressBar.style.width = '80%';
-          statusText.textContent = 'Preparando archivos...';
-          
-          const outputFiles = [];
-          const partDuration = audioBuffer.duration / parts;
-          
-          for (let i = 0; i < splitBuffers.length; i++) {
-            const blob = await audioSplitter.bufferToWav(splitBuffers[i]);
-            const url = URL.createObjectURL(blob);
-            
-            outputFiles.push({
-              name: `${getFileBaseName(selectedFile.name)}_parte_${i + 1}.wav`,
-              url: url,
-              duration: partDuration,
-              size: blob.size
-            });
-          }
-          
-          // Mostrar 100% de progreso
-          progressBar.style.width = '100%';
-          statusText.textContent = '¡Proceso completado!';
-          
-          // Mostrar enlaces de descarga
-          displayDownloadLinks(outputFiles);
-          
-        } catch (error) {
-          console.error('Error:', error);
-          statusText.textContent = `Error: ${error.message || 'Error al procesar el archivo'}`;
-          progressBar.style.backgroundColor = '#ef476f';
-        }
-      });
-
-      // Función para mostrar enlaces de descarga
-      function displayDownloadLinks(files) {
-        downloadLinks.innerHTML = '';
-
-        files.forEach((file, index) => {
-          const item = document.createElement('div');
-          item.className = 'download-item';
-          
-          const partName = document.createElement('div');
-          partName.className = 'part-name';
-          partName.textContent = `Parte ${index + 1}`;
-          
-          const partInfo = document.createElement('div');
-          partInfo.className = 'part-info';
-          partInfo.textContent = `Duración: ${formatDuration(file.duration)} | Tamaño: ${formatFileSize(file.size)}`;
-          
-          const link = document.createElement('a');
-          link.href = file.url;
-          link.className = 'download-link';
-          link.download = file.name;
-          link.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Descargar
-          `;
-          
-          item.appendChild(partName);
-          item.appendChild(partInfo);
-          item.appendChild(link);
-          downloadLinks.appendChild(item);
-        });
-
-        resultsContainer.classList.remove('hidden');
+        // Mostrar nombre y tamaño mientras se carga la duración
+        fileNameDisplay.textContent = info + ' | Duración: ...';
+        fileNameDisplay.classList.add('visible');
+        splitButton.disabled = false;
+      } else {
+        fileNameDisplay.textContent = 'Ningún archivo seleccionado';
+        fileNameDisplay.classList.remove('visible');
+        splitButton.disabled = true;
       }
     });
-  </script>
+
+    // Controles para el número de partes
+    decreasePartsBtn.addEventListener('click', () => {
+      const currentValue = parseInt(partsInput.value);
+      if (currentValue > 2) {
+        partsInput.value = currentValue - 1;
+      }
+    });
+
+    increasePartsBtn.addEventListener('click', () => {
+      const currentValue = parseInt(partsInput.value);
+      partsInput.value = currentValue + 1;
+    });
+
+    // Validar número de partes
+    partsInput.addEventListener('input', () => {
+      const value = parseInt(partsInput.value);
+      if (value < 2) {
+        partsInput.value = 2;
+      }
+    });
+
+    // Obtener nombre base del archivo sin extensión
+    function getFileBaseName(fileName) {
+      return fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+    }
+
+    // Manejar el proceso de división
+    splitButton.addEventListener('click', async () => {
+      if (!selectedFile) return;
+
+      const parts = parseInt(partsInput.value);
+      if (parts < 2) {
+        alert('Debes dividir el archivo en al menos 2 partes');
+        return;
+      }
+
+      // Mostrar progreso
+      progressContainer.classList.remove('hidden');
+      resultsContainer.classList.add('hidden');
+      progressBar.style.width = '0%';
+      statusText.textContent = 'Cargando archivo...';
+
+      try {
+        // Cargar el audio
+        progressBar.style.width = '20%';
+        const audioBuffer = await audioSplitter.loadAudio(selectedFile);
+        
+        // Dividir el audio
+        progressBar.style.width = '50%';
+        statusText.textContent = 'Dividiendo audio...';
+        const splitBuffers = audioSplitter.splitAudio(audioBuffer, parts);
+        
+        // Convertir a WAV
+        progressBar.style.width = '80%';
+        statusText.textContent = 'Preparando archivos...';
+        
+        const outputFiles = [];
+        const partDuration = audioBuffer.duration / parts;
+        
+        for (let i = 0; i < splitBuffers.length; i++) {
+          const blob = await audioSplitter.bufferToWav(splitBuffers[i]);
+          const url = URL.createObjectURL(blob);
+          
+          outputFiles.push({
+            name: `${getFileBaseName(selectedFile.name)}_parte_${i + 1}.wav`,
+            url: url,
+            duration: partDuration,
+            size: blob.size
+          });
+        }
+        
+        // Mostrar 100% de progreso
+        progressBar.style.width = '100%';
+        statusText.textContent = '¡Proceso completado!';
+        
+        // Mostrar enlaces de descarga
+        displayDownloadLinks(outputFiles);
+        
+      } catch (error) {
+        console.error('Error:', error);
+        statusText.textContent = `Error: ${error.message || 'Error al procesar el archivo'}`;
+        progressBar.style.backgroundColor = '#ef476f';
+      }
+    });
+
+    // Función para mostrar enlaces de descarga
+    function displayDownloadLinks(files) {
+      downloadLinks.innerHTML = '';
+
+      files.forEach((file, index) => {
+        const item = document.createElement('div');
+        item.className = 'download-item';
+        
+        const partName = document.createElement('div');
+        partName.className = 'part-name';
+        partName.textContent = `Parte ${index + 1}`;
+        
+        const partInfo = document.createElement('div');
+        partInfo.className = 'part-info';
+        partInfo.textContent = `Duración: ${formatDuration(file.duration)} | Tamaño: ${formatFileSize(file.size)}`;
+        
+        const link = document.createElement('a');
+        link.href = file.url;
+        link.className = 'download-link';
+        link.download = file.name;
+        link.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Descargar
+        `;
+        
+        item.appendChild(partName);
+        item.appendChild(partInfo);
+        item.appendChild(link);
+        downloadLinks.appendChild(item);
+      });
+
+      resultsContainer.classList.remove('hidden');
+    }
+  });
+</script>
 </body>
 </html>
