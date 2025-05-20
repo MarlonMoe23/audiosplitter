@@ -4,42 +4,640 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Divisor de Audio</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary-color: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary-color: #48cae4;
+      --accent-color: #4cc9f0;
+      --success-color: #06d6a0;
+      --error-color: #ef476f;
+      --background-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-primary: #2b2d42;
+      --text-secondary: #6c757d;
+      --border-radius: 12px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      line-height: 1.6;
+      color: var(--text-primary);
+      background-color: var(--background-color);
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 40px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      color: var(--primary-color);
+      font-weight: 700;
+      font-size: 2.5rem;
+      position: relative;
+      padding-bottom: 15px;
+    }
+
+    h1::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      border-radius: 2px;
+    }
+
+    .app-description {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+    }
+
+    .upload-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+
+    .file-upload-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      background-color: rgba(67, 97, 238, 0.05);
+      border-radius: var(--border-radius);
+      padding: 40px 20px;
+    }
+
+    .file-icon {
+      width: 60px;
+      height: 60px;
+      background-color: rgba(67, 97, 238, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-icon svg {
+      width: 30px;
+      height: 30px;
+      fill: var(--primary-color);
+    }
+
+    .file-label {
+      display: block;
+      padding: 16px 25px;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 50px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      min-width: 200px;
+    }
+
+    .file-label:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-name-display {
+      padding: 10px 15px;
+      background-color: rgba(67, 97, 238, 0.08);
+      border-radius: 8px;
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      display: none;
+    }
+
+    .file-name-display.visible {
+      display: block;
+    }
+
+    .parts-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: var(--border-radius);
+    }
+
+    .parts-container label {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .parts-input-group {
+      display: flex;
+      align-items: center;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 5px;
+      background-color: white;
+    }
+
+    .parts-btn {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #e9ecef;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--text-primary);
+      transition: var(--transition);
+    }
+
+    .parts-btn:hover {
+      background-color: #dee2e6;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      padding: 8px;
+      border: none;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 500;
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    button#split-button {
+      width: 100%;
+      padding: 16px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    button#split-button svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    button#split-button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+
+    button#split-button:disabled {
+      background-color: #cfd8dc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #progress-container {
+      padding: 30px;
+      background-color: #fff;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .progress-bar {
+      height: 15px;
+      background-color: #e9ecef;
+      border-radius: 30px;
+      margin-bottom: 15px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    #progress {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 30px;
+    }
+
+    #status {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-top: 10px;
+    }
+
+    #results {
+      background-color: #fff;
+      border-radius: var(--border-radius);
+      padding: 30px;
+      box-shadow: var(--shadow);
+      margin-top: 30px;
+    }
+
+    h2 {
+      margin-bottom: 25px;
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 1.5rem;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    h2::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      border-radius: 2px;
+    }
+
+    #download-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .download-item {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      transition: var(--transition);
+    }
+
+    .download-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .download-item .part-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 1.1rem;
+    }
+
+    .download-item .part-info {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .download-link {
+      padding: 10px 15px;
+      background-color: var(--success-color);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: var(--transition);
+      font-weight: 500;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .download-link:hover {
+      background-color: #05b889;
+      transform: translateY(-2px);
+    }
+
+    .download-link svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 25px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .file-upload-area {
+        padding: 30px 15px;
+      }
+      
+      #download-links {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .parts-container {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .container {
+        padding: 20px 15px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>Divisor de Archivos de Audio</h1>
-    
+    <h1>Divisor de Audio</h1>
+    <p class="app-description">Divide tus archivos de audio en partes iguales de forma rápida y sencilla.</p>
+
     <div class="upload-container">
-      <label for="audio-file" class="file-label">
-        <span id="file-name">Seleccionar archivo de audio</span>
+      <div class="file-upload-area">
+        <div class="file-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 18.5C12 19.3284 11.3284 20 10.5 20H6.5C5.67157 20 5 19.3284 5 18.5V5.5C5 4.67157 5.67157 4 6.5 4H10.5C11.3284 4 12 4.67157 12 5.5V18.5Z" fill="currentColor" />
+            <path d="M19 16.5C19 17.3284 18.3284 18 17.5 18H13.5C12.6716 18 12 17.3284 12 16.5V7.5C12 6.67157 12.6716 6 13.5 6H17.5C18.3284 6 19 6.67157 19 7.5V16.5Z" fill="currentColor" />
+          </svg>
+        </div>
+        <label for="audio-file" class="file-label">
+          <span>Seleccionar archivo</span>
+        </label>
         <input type="file" id="audio-file" accept=".mp3,.m4a,.wav,.ogg">
-      </label>
+        <div id="file-name" class="file-name-display">Ningún archivo seleccionado</div>
+      </div>
       
       <div class="parts-container">
         <label for="parts">Dividir en:</label>
-        <input type="number" id="parts" min="2" value="2">
+        <div class="parts-input-group">
+          <button type="button" class="parts-btn" id="decrease-parts">-</button>
+          <input type="number" id="parts" min="2" value="2">
+          <button type="button" class="parts-btn" id="increase-parts">+</button>
+        </div>
         <span>partes iguales</span>
       </div>
       
-      <button id="split-button" disabled>Dividir Audio</button>
+      <button id="split-button" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Dividir Audio
+      </button>
     </div>
-    
+
     <div id="progress-container" class="hidden">
       <div class="progress-bar">
         <div id="progress"></div>
       </div>
       <p id="status">Procesando...</p>
     </div>
-    
+
     <div id="results" class="hidden">
       <h2>Archivos Divididos</h2>
       <div id="download-links"></div>
     </div>
-        
+    
+    <div class="footer">
+      <p>Divisor de Audio © 2025 - Todos los derechos reservados</p>
+    </div>
   </div>
-  
+
   <script src="browser-splitter.js"></script>
-  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const audioFileInput = document.getElementById('audio-file');
+      const fileNameDisplay = document.getElementById('file-name');
+      const partsInput = document.getElementById('parts');
+      const decreasePartsBtn = document.getElementById('decrease-parts');
+      const increasePartsBtn = document.getElementById('increase-parts');
+      const splitButton = document.getElementById('split-button');
+      const progressContainer = document.getElementById('progress-container');
+      const progressBar = document.getElementById('progress');
+      const statusText = document.getElementById('status');
+      const resultsContainer = document.getElementById('results');
+      const downloadLinks = document.getElementById('download-links');
+
+      let selectedFile = null;
+      const audioSplitter = new AudioSplitter();
+
+      // Actualizar nombre del archivo seleccionado
+      audioFileInput.addEventListener('change', (e) => {
+        selectedFile = e.target.files[0];
+
+        if (selectedFile) {
+          fileNameDisplay.textContent = selectedFile.name;
+          fileNameDisplay.classList.add('visible');
+          splitButton.disabled = false;
+        } else {
+          fileNameDisplay.textContent = 'Ningún archivo seleccionado';
+          fileNameDisplay.classList.remove('visible');
+          splitButton.disabled = true;
+        }
+      });
+
+      // Controles para el número de partes
+      decreasePartsBtn.addEventListener('click', () => {
+        const currentValue = parseInt(partsInput.value);
+        if (currentValue > 2) {
+          partsInput.value = currentValue - 1;
+        }
+      });
+
+      increasePartsBtn.addEventListener('click', () => {
+        const currentValue = parseInt(partsInput.value);
+        partsInput.value = currentValue + 1;
+      });
+
+      // Validar número de partes
+      partsInput.addEventListener('input', () => {
+        const value = parseInt(partsInput.value);
+        if (value < 2) {
+          partsInput.value = 2;
+        }
+      });
+
+      // Obtener nombre base del archivo sin extensión
+      function getFileBaseName(fileName) {
+        return fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+      }
+
+      // Formatear duración en segundos a formato MM:SS
+      function formatDuration(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+      }
+
+      // Formatear tamaño de archivo
+      function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' bytes';
+        else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+        else return (bytes / 1048576).toFixed(1) + ' MB';
+      }
+
+      // Manejar el proceso de división
+      splitButton.addEventListener('click', async () => {
+        if (!selectedFile) return;
+
+        const parts = parseInt(partsInput.value);
+        if (parts < 2) {
+          alert('Debes dividir el archivo en al menos 2 partes');
+          return;
+        }
+
+        // Mostrar progreso
+        progressContainer.classList.remove('hidden');
+        resultsContainer.classList.add('hidden');
+        progressBar.style.width = '0%';
+        statusText.textContent = 'Cargando archivo...';
+
+        try {
+          // Cargar el audio
+          progressBar.style.width = '20%';
+          const audioBuffer = await audioSplitter.loadAudio(selectedFile);
+          
+          // Dividir el audio
+          progressBar.style.width = '50%';
+          statusText.textContent = 'Dividiendo audio...';
+          const splitBuffers = audioSplitter.splitAudio(audioBuffer, parts);
+          
+          // Convertir a WAV
+          progressBar.style.width = '80%';
+          statusText.textContent = 'Preparando archivos...';
+          
+          const outputFiles = [];
+          const partDuration = audioBuffer.duration / parts;
+          
+          for (let i = 0; i < splitBuffers.length; i++) {
+            const blob = await audioSplitter.bufferToWav(splitBuffers[i]);
+            const url = URL.createObjectURL(blob);
+            
+            outputFiles.push({
+              name: `${getFileBaseName(selectedFile.name)}_parte_${i + 1}.wav`,
+              url: url,
+              duration: partDuration,
+              size: blob.size
+            });
+          }
+          
+          // Mostrar 100% de progreso
+          progressBar.style.width = '100%';
+          statusText.textContent = '¡Proceso completado!';
+          
+          // Mostrar enlaces de descarga
+          displayDownloadLinks(outputFiles);
+          
+        } catch (error) {
+          console.error('Error:', error);
+          statusText.textContent = `Error: ${error.message || 'Error al procesar el archivo'}`;
+          progressBar.style.backgroundColor = '#ef476f';
+        }
+      });
+
+      // Función para mostrar enlaces de descarga
+      function displayDownloadLinks(files) {
+        downloadLinks.innerHTML = '';
+
+        files.forEach((file, index) => {
+          const item = document.createElement('div');
+          item.className = 'download-item';
+          
+          const partName = document.createElement('div');
+          partName.className = 'part-name';
+          partName.textContent = `Parte ${index + 1}`;
+          
+          const partInfo = document.createElement('div');
+          partInfo.className = 'part-info';
+          partInfo.textContent = `Duración: ${formatDuration(file.duration)} | Tamaño: ${formatFileSize(file.size)}`;
+          
+          const link = document.createElement('a');
+          link.href = file.url;
+          link.className = 'download-link';
+          link.download = file.name;
+          link.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Descargar
+          `;
+          
+          item.appendChild(partName);
+          item.appendChild(partInfo);
+          item.appendChild(link);
+          downloadLinks.appendChild(item);
+        });
+
+        resultsContainer.classList.remove('hidden');
+      }
+    });
+  </script>
 </body>
 </html>
